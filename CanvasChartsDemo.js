@@ -34,16 +34,34 @@ var Init = function(id,array)
                 graph:
                 {
                 	type: 'line',
-                	separation: 20,
-                	color: '#FF2491'
+                	separation: 30,
+                    width: 20,
+                	color: '#FF2491',
+                    value: 0,
+                    x: 0,
+                    y: 0,
+                    allValues : 0
                 }
             };
 
             self.drawGridLines(self.gridOptions.minorLines);
             self.drawGridLines(self.gridOptions.majorLines);
             self.addLabelsToAxis(self.gridOptions.text);
-            self.drawLine(self.gridOptions.graph);
+            
+            for (var i = 0; i < self.values.length; i++) 
+            {
+               self.gridOptions.graph.allValues += self.values[i];
+            }
 
+            for (var i = 0; i < self.values.length; i++) 
+            {
+               self.gridOptions.graph.color = self.changeColor();
+               self.gridOptions.graph.value = self.values[i];
+               self.gridOptions.graph.x += self.gridOptions.graph.separation + self.gridOptions.graph.width;
+               self.gridOptions.graph.y = self.iHeight - 60 - self.gridOptions.graph.value;
+               self.drawBarChart(self.gridOptions.graph);
+            }
+            
             return;
         }
 
@@ -93,25 +111,20 @@ var Init = function(id,array)
             self.ctx.strokeWidth = 1;
             self.ctx.beginPath();
             self.ctx.font = lineOptions.font;
-            console.log("first array:");
             for (var i = self.xArray.length - 1; i >= 0; i--) 
        		{
        			if(self.xArray[i] % 30 === 0 || self.xArray[i] === 0)
        			{
-       				console.log(self.xArray[i]);
-       				self.ctx.textAlign = 'right';
+     				self.ctx.textAlign = 'right';
        				self.ctx.strokeText(self.xArray[i], self.xArray[i], this.iHeight - 20);
        			}
             }
             self.yArray = self.yArray.reverse();
-            console.log("second array:");
             for (var i = self.yArray.length - 1; i >= 0; i--) 
        		{
        			if(self.yArray[i] % 30 === 0 || self.yArray[i] === 0)
        			{
        				var length = (self.iHeight-self.yArray[i]);
-       				console.log(length);
-       				console.log(self.yArray[i]);
        				self.ctx.textAlign = 'left';
        				self.ctx.strokeText(length, 0, self.yArray[i]);
             	}
@@ -122,23 +135,37 @@ var Init = function(id,array)
             return;
         }
 
-        self.drawLine = function(lineOptions)
+        self.getRandomInt = function(min, max) 
         {
-        	
-            self.ctx.strokeStyle = lineOptions.color;
-            self.ctx.strokeWidth = 1;
-            self.ctx.beginPath();
-        	var x = 1;
-        	var y = 1;
-        	for (var i = self.values.length - 1; i >= 0; i--)
-        	{
-        		x += lineOptions.separation;
-        		y = self.iHeight - 50;
-        		var val = self.values[i]/self.iHeight;
-        		self.ctx.moveTo(x,y);
-        		self.ctx.fillRect(x, val, 10, self.values[i]*100);
-	        }
+            return Math.floor(Math.random() * Math.abs(max - min));
+        }
 
+        self.changeColor = function()
+        {
+            var colorString = "0123456789ABCDEF";
+            var color = "#";    
+
+            for (var i = 1; i <= 6; i++) 
+            {
+                 color += colorString[self.getRandomInt(0,colorString.length)];      
+            }
+            return color;
+        }    
+
+        self.drawBarChart = function(lineOptions)
+        {
+            self.ctx.strokeStyle = "#FFFFFF";
+            self.ctx.fillStyle = lineOptions.color;
+            self.ctx.strokeWidth = 2;
+            self.ctx.beginPath();
+        	var x = lineOptions.x;
+        	var y = lineOptions.y;
+            var counter = lineOptions.allValues;
+            var height = lineOptions.value;
+            var width = lineOptions.width;
+            self.ctx.rect(x, y, width, height);
+            self.ctx.fill();
+            self.ctx.stroke();
 	        self.ctx.closePath();
             return;
         }
