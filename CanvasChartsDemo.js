@@ -169,4 +169,25 @@ var Init = function(id,array)
 	        self.ctx.closePath();
             return;
         }
+
+
+        self.cnv.onmousemove = function (e)
+        {
+            var ca = e.target;
+            var co = ca.getContext('2d');
+            var X = e.screenX;
+            var Y = e.screenY;
+            var xStart = self.gridOptions.graph.x;
+            var xEnd = self.gridOptions.graph.x + self.gridOptions.graph.width;
+            var yStart = self.gridOptions.graph.y;
+            var yEnd = self.gridOptions.graph.y + self.gridOptions.graph.value;
+            //console.log("X: " + xEnd + " Y: " + xStart);
+            //console.log("X: " + yEnd + " Y: " + yStart);
+            if(( xStart <= X && X <= xEnd ) || ((xStart + yStart) <= X && X <= (xEnd + yEnd) )
+             && ( yStart <= Y && Y <= yEnd ) || ((yStart + xEnd) <= Y && Y <= (yEnd + xEnd) )) 
+            {
+                console.log("InnerX: " + X + "InnerY: " + Y);
+            }            
+            
+        }
  }
