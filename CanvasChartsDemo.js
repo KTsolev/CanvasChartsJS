@@ -135,7 +135,7 @@ var Init = function(id,array)
         		x += lineOptions.separation;
         		y = self.iHeight - 50;
         		var val = self.values[i]/self.iHeight;
-        		//self.ctx.moveTo(x,y);
+        		self.ctx.moveTo(x,y);
         		self.ctx.fillRect(x, val, 10, self.values[i]*100);
 	        }
 
