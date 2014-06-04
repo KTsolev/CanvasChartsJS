@@ -40,7 +40,8 @@ var Init = function(id,array)
                     value: 0,
                     x: 0,
                     y: 0,
-                    allValues : 0
+                    allValues : 0,
+                    coordinates: []
                 }
             };
 
@@ -163,31 +164,37 @@ var Init = function(id,array)
             var counter = lineOptions.allValues;
             var height = lineOptions.value;
             var width = lineOptions.width;
-            self.ctx.rect(x, y, width, height);
-            self.ctx.fill();
-            self.ctx.stroke();
-	        self.ctx.closePath();
+            lineOptions.coordinates.push({'X' : x, 'Y' : y, 'H': height, 'W': width, "Color":lineOptions.color});
+            self.ctx.fillRect(x, y, width, height); 
+            self.ctx.closePath();  
             return;
         }
 
-
-        self.cnv.onmousemove = function (e)
+        self.cnv.onmousemove = function (event)
         {
-            var ca = e.target;
-            var co = ca.getContext('2d');
-            var X = e.screenX;
-            var Y = e.screenY;
-            var xStart = self.gridOptions.graph.x;
-            var xEnd = self.gridOptions.graph.x + self.gridOptions.graph.width;
-            var yStart = self.gridOptions.graph.y;
-            var yEnd = self.gridOptions.graph.y + self.gridOptions.graph.value;
-            //console.log("X: " + xEnd + " Y: " + xStart);
-            //console.log("X: " + yEnd + " Y: " + yStart);
-            if(( xStart <= X && X <= xEnd ) || ((xStart + yStart) <= X && X <= (xEnd + yEnd) )
-             && ( yStart <= Y && Y <= yEnd ) || ((yStart + xEnd) <= Y && Y <= (yEnd + xEnd) )) 
-            {
-                console.log("InnerX: " + X + "InnerY: " + Y);
-            }            
-            
-        }
+            var rects = self.gridOptions.graph.coordinates;
+             for (var i = 0, len = rects.length; i < len; i++) 
+             {
+                var x = event.offsetX; 
+                var y = event.offsetY;  
+                var left = rects[i].X; 
+                var right = rects[i].X+rects[i].W;
+                var top = rects[i].Y;
+                var bottom = rects[i].Y+rects[i].H;
+                if (right >= x && left <= x && bottom >= y && top <= y) 
+                {
+                    var my_gradient = self.ctx.createLinearGradient(0, 0, 170, 170);
+                    my_gradient.addColorStop(0,rects[i].Color);
+                    my_gradient.addColorStop(1,"#FFFFFF");
+                    self.ctx.fillStyle = my_gradient;rects[i].Color;
+                    self.ctx.fillRect(rects[i].X, rects[i].Y, rects[i].W, rects[i].H);
+                    console.log("I'm in :)");
+                }
+                else
+                {
+                    console.log("I'm out :(")
+                }
+            }
+
+            }
  }
