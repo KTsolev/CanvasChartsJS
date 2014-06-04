@@ -164,6 +164,8 @@ var Init = function(id,array)
             var counter = lineOptions.allValues;
             var height = lineOptions.value;
             var width = lineOptions.width;
+            self.ctx.font="20px Verdana";
+            self.ctx.fillText(height, x , y - 10);
             lineOptions.coordinates.push({'X' : x, 'Y' : y, 'H': height, 'W': width, "Color":lineOptions.color});
             self.ctx.fillRect(x, y, width, height); 
             self.ctx.closePath();  
@@ -183,18 +185,17 @@ var Init = function(id,array)
                 var bottom = rects[i].Y+rects[i].H;
                 if (right >= x && left <= x && bottom >= y && top <= y) 
                 {
-                    var my_gradient = self.ctx.createLinearGradient(0, 0, 170, 170);
+                    var my_gradient = self.ctx.createLinearGradient(0, 0, top+200, bottom+100);
                     my_gradient.addColorStop(0,rects[i].Color);
                     my_gradient.addColorStop(1,"#FFFFFF");
                     self.ctx.fillStyle = my_gradient;rects[i].Color;
                     self.ctx.fillRect(rects[i].X, rects[i].Y, rects[i].W, rects[i].H);
-                    console.log("I'm in :)");
                 }
                 else
                 {
-                    console.log("I'm out :(")
+                    self.ctx.fillStyle = rects[i].Color;
+                    self.ctx.fillRect(rects[i].X, rects[i].Y, rects[i].W, rects[i].H);
                 }
             }
-
-            }
+        }
  }
