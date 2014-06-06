@@ -4,13 +4,25 @@ var Init = function(id,array)
 	self.values = array;
 	self.xArray = [];	
 	self.yArray = [];
-	self.xArray[0] = 0;
-	self.yArray[0] = 0;
 	self.cnv = document.getElementById(id);       
-	self.iWidth = self.cnv.width + 30;
-    self.iHeight = self.cnv.height + 20;
+    self.cnv.width += array.length * 50;
+    var maxELement = array[0];
+    for (var i = 0; i < array.length; i++) 
+    {
+       if(array[i] > maxELement)
+       {
+            maxELement = array[i];
+       }
+       else
+       {
+         continue;   
+       }
+    }
+    self.cnv.height = maxELement + 30; 
+	self.iWidth = self.cnv.width;
+    self.iHeight = self.cnv.height + array.length / 2 * 10;
     self.ctx = self.cnv.getContext('2d');
-
+    self.ctx.font = "100 15px Verdana";
     self.drawGrid = function () 
     {
             self.gridOptions = 
@@ -18,37 +30,42 @@ var Init = function(id,array)
                 minorLines: 
                 {
                     separation: 5,
-                    color: '#B6FAF7'
+                    color: '#DEDEDE'
                 },
                 majorLines: 
                 {
-                    separation: 30,
-                    color: '#5996FF'
+                    separation: 35,
+                    color: '#BABABA'
                 },
                 text:
                 {
                 	separation: 30,
-                	color: '#FF2491',
+                	color: '#BABABA',
                 	font: "10pt Verdana"	
                 },
                 graph:
                 {
-                	type: 'line',
-                	separation: 30,
-                    width: 20,
-                	color: '#FF2491',
+                	type: 'bar',
+                	separation: 20,
+                    width: 35,
+                	color: '#0E0054',
+                    xAxisTitle: "Sells in MK [lvl]",
+                    yAxisTitle: "",
+                    title: "",
                     value: 0,
                     x: 0,
                     y: 0,
                     allValues : 0,
-                    coordinates: []
+                    coordinates: [],
+                    data: [],
+                    xAxis: ['banicki','bozi','ekleri','vodka','akaciq','dunki','jenski','mujki','skakauec','lenovo','poro','poropotato'],
+                    yAxis: []
                 }
             };
 
             self.drawGridLines(self.gridOptions.minorLines);
             self.drawGridLines(self.gridOptions.majorLines);
-            self.addLabelsToAxis(self.gridOptions.text);
-            
+                      
             for (var i = 0; i < self.values.length; i++) 
             {
                self.gridOptions.graph.allValues += self.values[i];
@@ -57,13 +74,15 @@ var Init = function(id,array)
             for (var i = 0; i < self.values.length; i++) 
             {
                self.gridOptions.graph.color = self.changeColor();
-               self.gridOptions.graph.value = self.values[i];
-               self.gridOptions.graph.x += self.gridOptions.graph.separation + self.gridOptions.graph.width;
-               self.gridOptions.graph.y = self.iHeight - 60 - self.gridOptions.graph.value;
-               self.drawBarChart(self.gridOptions.graph);
-            }
-            
-            return;
+               self.gridOptions.graph.value = Math.floor((self.values[i]/self.gridOptions.graph.allValues) * 1000);
+               self.gridOptions.graph.x += self.gridOptions.graph.separation + self.gridOptions.graph.width + 25;
+               self.gridOptions.graph.y = self.iHeight - self.gridOptions.graph.value - 50;
+               self.drawBarChart(self.gridOptions.graph);        
+           }
+           
+           self.addLabelsToAxis(self.gridOptions.graph);
+
+           return;
         }
 
         self.drawGridLines = function (lineOptions) 
@@ -71,15 +90,14 @@ var Init = function(id,array)
 
             self.ctx.strokeStyle = lineOptions.color;
             self.ctx.strokeWidth = 1;
-
             self.ctx.beginPath();
-
             var iCount = null;
             var i = null;
             var x = null;
             var y = null;
 
             iCount = Math.floor(self.iWidth / lineOptions.separation);
+
             for (i = 1; i <= iCount; i++) 
             {
                 x = (i * lineOptions.separation);
@@ -92,6 +110,7 @@ var Init = function(id,array)
 
             iCount = Math.floor(self.iHeight / lineOptions.separation);
             var yCount = 1;
+            
             for (i = 1; i <= iCount; i++) 
             {
                 y = (i * lineOptions.separation);  
@@ -108,29 +127,52 @@ var Init = function(id,array)
 
         self.addLabelsToAxis = function(lineOptions)
         {
-        	self.ctx.strokeStyle = lineOptions.color;
+        	self.ctx.fillStyle = lineOptions.color;
             self.ctx.strokeWidth = 1;
             self.ctx.beginPath();
             self.ctx.font = lineOptions.font;
-            for (var i = self.xArray.length - 1; i >= 0; i--) 
-       		{
-       			if(self.xArray[i] % 30 === 0 || self.xArray[i] === 0)
-       			{
-     				self.ctx.textAlign = 'right';
-       				self.ctx.strokeText(self.xArray[i], self.xArray[i], this.iHeight - 20);
-       			}
+            self.ctx.textAlign = 'right';
+            lineOptions.title="Bar Charts";
+            self.ctx.fillText(lineOptions.title, self.iWidth / 2, 20);  
+            self.ctx.save();
+            self.ctx.translate(100,300);
+            self.ctx.rotate(-0.5*Math.PI);
+            self.ctx.fillText(lineOptions.xAxisTitle, self.iHeight/2 - array.length*10, - 85);
+            self.ctx.restore();    
+            var distance = 50;
+            var cnv1 = document.createElement('canvas');
+            cnv1.width = self.cnv.width;
+            cnv1.height = 250;
+            var ctx1 = cnv1.getContext('2d');
+            ctx1.font  = self.gridOptions.text.font;
+            ctx1.color = self.gridOptions.text.color;
+            var ctx1 = cnv1.getContext('2d'); 
+            //----------X_Axis--------------//
+            for (var i = 0 ; i < lineOptions.xAxis.length; i++) 
+            {
+                if(i == lineOptions.coordinates.length) break;
+                
+                ctx1.beginPath();
+                ctx1.textAlign = 'right';
+                distance += lineOptions.separation + lineOptions.xAxis[i].length + 50;
+       //         ctx1.rotate(-0.5*Math.PI);   
+                console.log(lineOptions);
+                ctx1.fillText(lineOptions.xAxis[i], lineOptions.coordinates[i].X + lineOptions.width , 20);
+                console.log(i);
+                ctx1.closePath();
             }
-            self.yArray = self.yArray.reverse();
-            for (var i = self.yArray.length - 1; i >= 0; i--) 
+            var container = document.getElementsByTagName('body')[0];
+            container.appendChild(cnv1);
+            //-------Y_Axis----------//
+            for (var i = 0; i <= self.cnv.height; i++) 
        		{
-       			if(self.yArray[i] % 30 === 0 || self.yArray[i] === 0)
+       			if(i % 30 == 0 )
        			{
-       				var length = (self.iHeight-self.yArray[i]);
+       				var length = i;
        				self.ctx.textAlign = 'left';
-       				self.ctx.strokeText(length, 0, self.yArray[i]);
+       				self.ctx.fillText(length, 35, self.cnv.height - i);
             	}
             }
-            
             self.ctx.closePath();
 
             return;
@@ -164,8 +206,10 @@ var Init = function(id,array)
             var counter = lineOptions.allValues;
             var height = lineOptions.value;
             var width = lineOptions.width;
-            self.ctx.font="20px Verdana";
+            self.ctx.save();
+            self.ctx.fillStyle = '#0E0054';
             self.ctx.fillText(height, x , y - 10);
+            self.ctx.restore();
             lineOptions.coordinates.push({'X' : x, 'Y' : y, 'H': height, 'W': width, "Color":lineOptions.color});
             self.ctx.fillRect(x, y, width, height); 
             self.ctx.closePath();  
@@ -185,7 +229,7 @@ var Init = function(id,array)
                 var bottom = rects[i].Y+rects[i].H;
                 if (right >= x && left <= x && bottom >= y && top <= y) 
                 {
-                    var my_gradient = self.ctx.createLinearGradient(0, 0, top+200, bottom+100);
+                    var my_gradient = self.ctx.createLinearGradient(0, 0, top-top/2, bottom+bottom/2);
                     my_gradient.addColorStop(0,rects[i].Color);
                     my_gradient.addColorStop(1,"#FFFFFF");
                     self.ctx.fillStyle = my_gradient;rects[i].Color;
